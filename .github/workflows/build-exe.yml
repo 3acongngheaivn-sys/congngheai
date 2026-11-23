@@ -1,0 +1,38 @@
+
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) {
+            pip install -r requirements.txt
+          }
+          pip install pyinstaller
+
+      - name: Build Windows EXE
+        run: |
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name "3A-CITY" AI_Font_Finder_PRO.py
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3A-CITY-Windows-EXE
+          path: dist/3A-CITY.exe
+          if-no-files-found: error
